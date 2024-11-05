@@ -20,3 +20,31 @@
     <script src="script.js"></script>
 </body>
 </html>
+<button id="exportButton">Export Quotes to JSON</button>
+<input type="file" id="importFile" accept=".json" />
+
+<script>
+// Function to import quotes from a JSON file
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function(e) {
+        try {
+            const importedQuotes = JSON.parse(e.target.result);
+            if (Array.isArray(importedQuotes)) {
+                quotes.push(...importedQuotes);
+                saveQuotes(); // Save the new quotes to local storage
+                alert('Quotes imported successfully!');
+                displayRandomQuote(); // Optionally display a new quote
+            } else {
+                alert("Invalid file format. Please upload a JSON file with an array of quotes.");
+            }
+        } catch (error) {
+            alert("Failed to import quotes. Ensure the file is a valid JSON format.");
+        }
+    };
+    fileReader.readAsText(event.target.files[0]);
+}
+
+// Add event listener for file input
+document.getElementById('importFile').addEventListener('change', importFromJsonFile);
+</script>

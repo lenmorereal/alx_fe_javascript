@@ -62,3 +62,62 @@ document.addEventListener('DOMContentLoaded', () => {
     createAddQuoteForm();
     showRandomQuote();
 });
+// Function to save quotes array to local storage
+function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+// Load quotes from Local Storage when the page loads
+function loadQuotes() {
+    const storedQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
+    if (storedQuotes.length > 0) {
+        quotes = storedQuotes;
+    }
+}
+
+// Modify addQuote function to include saveQuotes
+function addQuote() {
+    const newQuoteText = document.getElementById('newQuoteText').value;
+    const newQuoteCategory = document.getElementById('newQuoteCategory').value;
+
+    if (newQuoteText && newQuoteCategory) {
+        const newQuote = { text: newQuoteText, category: newQuoteCategory };
+        quotes.push(newQuote);
+        saveQuotes(); // Save to local storage
+        document.getElementById('newQuoteText').value = '';
+        document.getElementById('newQuoteCategory').value = '';
+        displayRandomQuote();
+    } else {
+        alert("Please enter both a quote and a category.");
+    }
+}
+
+// Optional: Use Session Storage to store the last displayed quote
+function saveLastViewedQuote(quote) {
+    sessionStorage.setItem('lastViewedQuote', JSON.stringify(quote));
+}
+
+// Function to display a random quote and save it in session storage
+function displayRandomQuote() {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    const quote = quotes[randomIndex];
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    quoteDisplay.textContent = `${quote.text} - ${quote.category}`;
+    saveLastViewedQuote(quote); // Save to session storage
+}
+// Function to export quotes array as a JSON file
+function exportToJson() {
+    const dataStr = JSON.stringify(quotes, null, 2); // Pretty-print JSON
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quotes.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Add event listener to the export button
+document.getElementById('exportButton').addEventListener('click', exportToJson);
