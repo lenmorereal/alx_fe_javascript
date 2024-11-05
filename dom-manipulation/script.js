@@ -182,3 +182,54 @@ function addQuote() {
         alert("Please enter both a quote and a category.");
     }
 }
+const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Placeholder API for simulation
+
+// Function to simulate fetching quotes from the server
+async function fetchQuotesFromServer() {
+    try {
+        const response = await fetch(API_URL);
+        const serverQuotes = await response.json();
+
+        // Parse the server data to fit your quote structure
+        const parsedQuotes = serverQuotes.map(item => ({
+            text: item.title,      // Using title for quote text
+            category: 'General'    // Assign a default category
+        }));
+
+        resolveConflicts(parsedQuotes);
+    } catch (error) {
+        console.error('Error fetching data from server:', error);
+    }
+}
+// Sync data by fetching server data every few minutes (5 minutes in this case)
+function setupPeriodicSync() {
+    setInterval(fetchQuotesFromServer, 300000); // 300000 ms = 5 minutes
+}
+function resolveConflicts(serverQuotes) {
+    const localQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+
+    // Merge server quotes with local quotes (server quotes take precedence in case of conflicts)
+    const mergedQuotes = [...serverQuotes, ...localQuotes.filter(localQuote =>
+        !serverQuotes.some(serverQuote => serverQuote.text === localQuote.text)
+    )];
+
+    // Save merged quotes to local storage
+    localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
+
+    // Refresh the display to reflect the updated quotes
+    quotes = mergedQuotes;
+    displayRandomQuote();
+    populateCategories();  // Refresh category list if new categories are added
+}
+function notifyUser(message) {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.className = 'notification'; // Style this class in CSS for visibility
+
+    document.body.appendChild(notification);
+
+    // Remove notification after a few seconds
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 3000);
+}
