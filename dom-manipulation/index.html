@@ -48,3 +48,8 @@ function importFromJsonFile(event) {
 // Add event listener for file input
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 </script>
+<!-- Category filter dropdown -->
+<select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+    <!-- Categories will be dynamically populated here -->
+</select>
