@@ -168,3 +168,40 @@ document.addEventListener('DOMContentLoaded', () => {
         addQuote(quoteText, quoteCategory);
     });
 });
+// Fetch quotes from a mock API
+async function fetchQuotesFromServer() {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const data = await response.json();
+    return data; // Adjust based on your expected quote structure
+}
+
+// Post a new quote to the mock API
+async function postQuoteToServer(quote) {
+    await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(quote)
+    });
+}
+
+// Sync local quotes with server
+async function syncQuotes() {
+    const serverQuotes = await fetchQuotesFromServer();
+    // Logic to update local storage with server quotes
+}
+
+// Set an interval to check for new quotes
+setInterval(syncQuotes, 60000);
+
+// Notify user about updates
+function notifyUserAboutUpdate() {
+    alert('Data has been updated from the server!');
+}
+
+// Initialization logic
+document.addEventListener('DOMContentLoaded', () => {
+    loadQuotes(); // Load local quotes
+    syncQuotes(); // Sync with server
+});
