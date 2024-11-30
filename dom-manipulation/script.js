@@ -1,58 +1,56 @@
-// Quotes Array (initialize from localStorage if available)
+// Initialize quotes array and load from local storage if available
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [];
 
-// Load Quotes on Initialization
-window.onload = () => {
-    loadQuotes();
-    const lastQuote = sessionStorage.getItem('lastViewedQuote');
-    if (lastQuote) {
-        displayQuote(lastQuote);
-    }
-};
-
-// Display a Quote
-function displayQuote(quote) {
-    const quoteDisplay = document.getElementById('quote-display');
-    quoteDisplay.textContent = quote;
-    sessionStorage.setItem('lastViewedQuote', quote); // Save to session storage
-}
-
-// Show a Random Quote
-function showRandomQuote() {
-    if (quotes.length === 0) {
-        alert('No quotes available. Add some quotes first.');
-        return;
-    }
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    displayQuote(quotes[randomIndex]);
-}
-
-// Add a New Quote
-function addNewQuote() {
-    const newQuoteInput = document.getElementById('new-quote');
-    const newQuote = newQuoteInput.value.trim();
-    if (!newQuote) {
-        alert('Please enter a valid quote.');
-        return;
-    }
-    quotes.push(newQuote);
-    localStorage.setItem('quotes', JSON.stringify(quotes)); // Save to local storage
-    newQuoteInput.value = ''; // Clear input
-    loadQuotes();
-}
-
-// Load Quotes into the Quotes Container
+// Function to load quotes into the DOM
 function loadQuotes() {
     const quotesContainer = document.getElementById('quotes-container');
-    quotesContainer.innerHTML = '';
+    quotesContainer.innerHTML = ''; // Clear previous quotes
+
+    if (quotes.length === 0) {
+        quotesContainer.innerHTML = '<p>No quotes available. Please add some quotes.</p>';
+        return;
+    }
+
     quotes.forEach((quote, index) => {
-        const quoteItem = document.createElement('div');
-        quoteItem.textContent = `${index + 1}: ${quote}`;
-        quotesContainer.appendChild(quoteItem);
+        const quoteElement = document.createElement('div');
+        quoteElement.classList.add('quote');
+        quoteElement.innerHTML = `
+            <p>${quote}</p>
+            <button onclick="viewQuote(${index})">View</button>
+            <button onclick="deleteQuote(${index})">Delete</button>
+        `;
+        quotesContainer.appendChild(quoteElement);
     });
 }
 
-// Export Quotes to JSON File
+// Function to add a new quote
+function addQuote() {
+    const newQuote = document.getElementById('new-quote').value;
+    if (newQuote) {
+        quotes.push(newQuote);
+        localStorage.setItem('quotes', JSON.stringify(quotes));
+        document.getElementById('new-quote').value = ''; // Clear the input
+        loadQuotes();
+    } else {
+        alert('Please enter a quote');
+    }
+}
+
+// Function to delete a quote
+function deleteQuote(index) {
+    quotes.splice(index, 1); // Remove the quote at the specified index
+    localStorage.setItem('quotes', JSON.stringify(quotes)); // Save updated quotes
+    loadQuotes();
+}
+
+// Function to view a quote (saving the last viewed quote in session storage)
+function viewQuote(index) {
+    const quote = quotes[index];
+    sessionStorage.setItem('lastViewedQuote', quote); // Save the last viewed quote
+    alert(`You are viewing: ${quote}`);
+}
+
+// Function to export quotes as a JSON file
 function exportToJsonFile() {
     const dataStr = JSON.stringify(quotes, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -64,7 +62,7 @@ function exportToJsonFile() {
     URL.revokeObjectURL(url);
 }
 
-// Import Quotes from JSON File
+// Function to import quotes from a JSON file
 function importFromJsonFile(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -86,3 +84,21 @@ function importFromJsonFile(event) {
     };
     reader.readAsText(file);
 }
+
+// Check for any saved last viewed quote in session storage
+function displayLastViewedQuote() {
+    const lastViewedQuote = sessionStorage.getItem('lastViewedQuote');
+    if (lastViewedQuote) {
+        alert(`Your last viewed quote: ${lastViewedQuote}`);
+    }
+}
+
+// Initialize the page by loading quotes and displaying the last viewed quote
+document.addEventListener('DOMContentLoaded', () => {
+    loadQuotes();
+    displayLastViewedQuote();
+
+    // Attach event listener for adding a new quote
+    document.getElementById('add-quote').addEventListener('click', addQuote);
+    document.getElementById('import-quotes').addEventListener('change', importFromJsonFile);
+});
