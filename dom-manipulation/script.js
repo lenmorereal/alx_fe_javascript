@@ -1,19 +1,23 @@
-// script.js
+// script.test.js
+import postQuoteToServer from './script';
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+// Mocking fetch API for POST
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ id: 101, text: 'This is a new quote' }),
+  })
+);
 
-async function fetchQuotesFromServer() {
-  try {
-    const response = await fetch(API_URL);  // Fetch the data from the server
-    if (!response.ok) {  // Check if the response is successful
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();  // Parse the response as JSON
-    return data;  // Return the fetched data
-  } catch (error) {
-    console.error('Error fetching quotes:', error);
-    return [];  // Return an empty array in case of an error
-  }
-}
+test('postQuoteToServer posts a new quote and returns the response', async () => {
+  const newQuote = { text: 'This is a new quote' };
+  const result = await postQuoteToServer(newQuote);
+  expect(result).toEqual({ id: 101, text: 'This is a new quote' });
+});
 
-export default fetchQuotesFromServer;
+test('postQuoteToServer handles errors on failure', async () => {
+  global.fetch.mockImplementationOnce(() => Promise.reject(new Error('Network Error')));
+  const newQuote = { text: 'This is a new quote' };
+  const result = await postQuoteToServer(newQuote);
+  expect(result).toBeNull();  // Check that null is returned on error
+});
