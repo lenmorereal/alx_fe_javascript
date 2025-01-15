@@ -107,3 +107,14 @@ async function manualSync() {
   const syncedQuotes = await syncQuotes();
   console.log('Synced quotes:', syncedQuotes);
 }
+// Function to show notifications to the user using alert
+function showNotification(message) {
+  alert(message);  // Display the message using the alert() method
+}
+
+// Periodically check for new quotes from the server (every 5 minutes)
+setInterval(async () => {
+  const quotes = await syncQuotes();
+  showNotification('Quotes synced with server!');  // Notify the user when syncing is successful
+  console.log('Quotes synchronized with the server', quotes);
+}, 5 * 60 * 1000);  // 5 minutes interval
